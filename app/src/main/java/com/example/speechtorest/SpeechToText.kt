@@ -16,9 +16,9 @@ class SpeechToText(
 
     private var recognizer: SpeechRecognizer? = null
 
-    fun start(langTag: String = "en-US") {
+    fun start(langTag: String = "ko-KR") {
         if (!SpeechRecognizer.isRecognitionAvailable(activity)) {
-            onError("Speech recognition not available"); return
+            onError("음성 인식을 사용할 수 없습니다"); return
         }
         recognizer = SpeechRecognizer.createSpeechRecognizer(activity).apply {
             setRecognitionListener(object : RecognitionListener {
@@ -28,7 +28,7 @@ class SpeechToText(
                 override fun onBufferReceived(buffer: ByteArray?) {}
                 override fun onEndOfSpeech() {}
                 override fun onEvent(eventType: Int, params: Bundle?) {}
-                override fun onError(error: Int) { onError("Speech error: ${'$'}error") }
+                override fun onError(error: Int) { onError("음성 인식 오류: $error") }
                 override fun onPartialResults(partialResults: Bundle) {
                     val text = partialResults
                         .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()

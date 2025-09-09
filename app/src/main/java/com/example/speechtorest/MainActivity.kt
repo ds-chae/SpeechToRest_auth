@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.launch
+import androidx.compose.material3.ExperimentalMaterial3Api
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
 
     private lateinit var stt: SpeechToText
@@ -30,7 +32,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 var transcript by remember { mutableStateOf("") }
-                var status by remember { mutableStateOf("Idle") }
+                var status by remember { mutableStateOf("대기 중") }
                 var isListening by remember { mutableStateOf(false) }
                 val scope = rememberCoroutineScope()
 
@@ -38,14 +40,14 @@ class MainActivity : ComponentActivity() {
                     stt = SpeechToText(
                         activity = this@MainActivity,
                         onPartial = { text -> transcript = text },
-                        onFinal = { text -> transcript = text; status = "Finalized"; isListening = false },
+                        onFinal = { text -> transcript = text; status = "완료됨"; isListening = false },
                         onError = { err -> status = err; isListening = false }
                     )
                     onDispose { stt.destroy() }
                 }
 
                 Scaffold(
-                    topBar = { TopAppBar(title = { Text("Speech → Text → REST") }) }
+                    topBar = { TopAppBar(title = { Text("음성 → 텍스트 → REST") }) }
                 ) { padding ->
                     Column(
                         Modifier
@@ -54,11 +56,11 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Status: $status")
+                        Text("상태: $status")
                         OutlinedTextField(
                             value = transcript,
                             onValueChange = { transcript = it },
-                            label = { Text("Transcribed text") },
+                            label = { Text("인식된 텍스트") },
                             modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -72,32 +74,32 @@ class MainActivity : ComponentActivity() {
                                     if (!hasPerm) {
                                         requestMic.launch(Manifest.permission.RECORD_AUDIO)
                                     } else {
-                                        status = "Listening…"
+                                        status = "듣는 중…"
                                         isListening = true
-                                        stt.start(langTag = "en-US")
+                                        stt.start(langTag = "ko-KR")
                                     }
                                 } else {
                                     // Stop
                                     stt.stop()
-                                    status = "Stopped"
+                                    status = "중지됨"
                                     isListening = false
                                 }
                             }) {
-                                Text(if (!isListening) "Start Recording" else "Stop Recording")
+                                Text(if (!isListening) "녹음 시작" else "녹음 중지")
                             }
 
                             Button(onClick = {
                                 scope.launch {
-                                    status = "Sending…"
+                                    status = "전송 중…"
                                     try {
                                         val res = ApiProvider.api.sendText(SpeechPayload(transcript))
-                                        status = "Server: ${'$'}{res.status} (id=${'$'}{res.id ?: "-"})"
+                                        status = "서버: ${res.status} (id=${res.id ?: "-"})"
                                     } catch (e: Exception) {
-                                        status = "Network error: ${'$'}{e.message}"
+                                        status = "네트워크 오류: ${e.message}"
                                     }
                                 }
                             }, enabled = transcript.isNotBlank()) {
-                                Text("Send to Server")
+                                Text("서버로 전송")
                             }
                         }
                     }

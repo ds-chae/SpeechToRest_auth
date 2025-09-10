@@ -8,6 +8,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -61,6 +63,16 @@ class MainActivity : ComponentActivity() {
                             value = transcript,
                             onValueChange = { transcript = it },
                             label = { Text("인식된 텍스트") },
+                            trailingIcon = {
+                                if (transcript.isNotEmpty()) {
+                                    IconButton(onClick = { transcript = "" }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "텍스트 지우기"
+                                        )
+                                    }
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
